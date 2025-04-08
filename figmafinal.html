@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Canvas Enhanced Submission Flow - v4 Pro</title>
+
+    <!-- Use the latest Tailwind CDN -->
+
+    <script src=https://cdn.tailwindcss.com?plugins=forms></script>
+
+    <!-- Google Fonts -->
+
+    <link rel="preconnect" href=https://fonts.googleapis.com>
+
+    <link rel="preconnect" href=https://fonts.gstatic.com crossorigin>
+
+    <link href=https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap rel="stylesheet">
+
+    <!-- Lucide Icons -->
+
+    <script src=https://unpkg.com/lucide-static@latest/dist/lucide.js></script>
+
+    <style>
+
+        /* Base styles */
+
+        html {
+
+            scroll-behavior: smooth;
+
+            scroll-padding-top: 8rem; /* Offset for fixed header */
+
+        }
+
+        body {
+
+            font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+            background-color: #F8F9FA; /* Slightly lighter neutral */
+
+            color: #212529; /* Darker text for better contrast */
+
+            -webkit-font-smoothing: antialiased;
+
+            -moz-osx-font-smoothing: grayscale;
+
+        }
+
+ 
+
+        /* Custom Tailwind Theme */
+
+        tailwind.config = {
+
+            theme: {
+
+                extend: {
+
+                    fontFamily: {
+
+                       sans: ['Lato', 'system-ui', 'sans-serif'],
+
+                    },
+
+                    colors: {
+
+                        'primary': {
+
+                            DEFAULT: '#005BAC', // Base Blue
+
+                            'light': '#E6F0FA',  // Lighter shade for backgrounds
+
+                            'dark': '#004A8C',   // Darker shade for hover/active
+
+                        },
+
+                        'secondary': { // Added Secondary/Accent
+
+                            DEFAULT: '#E7792D',
+
+                            'dark': '#C6641E',
+
+                        },
+
+                        'success': {
+
+                            DEFAULT: '#1B7F40',
+
+                            'light': '#E8F2EB',
+
+                            'dark': '#156A34',
+
+                        },
+
+                        'error': {
+
+                            DEFAULT: '#C73225',
+
+                            'light': '#FAEAEE',
+
+                            'dark': '#A52A1D',
+
+                        },
+
+                        'warning': { // Added Warning
+
+                            DEFAULT: '#FFC107',
+
+                            'light': '#FFF8E1',
+
+                            'dark': '#D39E00',
+
+                        },
+
+                        'neutral': {
+
+                            '50': '#F8F9FA', // Lightest bg
+
+                            '100': '#F1F3F5', // Subtle bg/borders
+
+                            '200': '#E9ECEF', // Borders
+
+                            '300': '#DEE2E6', // Borders, disabled elements
+
+                            '400': '#CED4DA', // Input borders
+
+                            '500': '#ADB5BD', // Medium text, placeholders
+
+                            '600': '#868E96', // Body text
+
+                            '700': '#495057', // Headings, important text
+
+                            '800': '#343A40', // Darker headings
+
+                            '900': '#212529', // Strongest text
+
+                        },
+
+                    },
+
+                    borderRadius: {
+
+                        'sm': '0.25rem', // 4px
+
+                        'md': '0.375rem', // 6px
+
+                        'lg': '0.5rem',   // 8px
+
+                        'xl': '0.75rem',  // 12px
+
+                        'full': '9999px',
+
+                    },
+
+                    boxShadow: {
+
+                        'sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+
+                        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+
+                        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+
+                        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+
+                        'inner-sm': 'inset 0 1px 2px 0 rgb(0 0 0 / 0.05)',
+
+                        'none': 'none',
+
+                    },
+
+                    transitionProperty: {
+
+                        'height': 'height',
+
+                        'spacing': 'margin, padding',
+
+                    },
+
+                    transitionTimingFunction: {
+
+                        'in-out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)', // Example custom timing
+
+                    }
+
+                }
+
+            },
+
+            plugins: [
+
+                require('@tailwindcss/forms')({
+
+                    strategy: 'class', // Use class strategy for better control
+
+                }),
+
+            ],
+
+        }
+
+ 
+
+        /* Enhanced Toggle Switch Styling */
+
+        .toggle-switch {
+
+            position: relative;
+
+            display: inline-block;
+
+            width: 48px; /* w-12 */
+
+            height: 28px; /* h-7 */
+
+        }
+
+        .toggle-switch input {
+
+            opacity: 0;
+
+            width: 0;
+
+            height: 0;
+
+        }
+
+        .toggle-slider {
+
+            position: absolute;
+
+            cursor: pointer;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            background-color: #CED4DA; /* neutral-400 */
+
+            transition: background-color 0.2s ease-in-out;
+
+            border-radius: 9999px; /* rounded-full */
+
+        }
+
+        .toggle-slider:before {
+
+            position: absolute;
+
+            content: "";
+
+            height: 20px; /* h-5 */
+
+            width: 20px; /* w-5 */
+
+            left: 4px;
+
+            bottom: 4px;
+
+            background-color: white;
+
+            border-radius: 50%;
+
+            transition: transform 0.2s ease-in-out;
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+        }
+
+        input:checked + .toggle-slider {
+
+            background-color: #1B7F40; /* success */
+
+        }
+
+        input:checked + .toggle-slider:before {
+
+            transform: translateX(20px); /* Move the knob */
+
+        }
+
+        input:focus-visible + .toggle-slider { /* Enhanced focus */
+
+             box-shadow: 0 0 0 3px rgba(0, 91, 172, 0.3); /* Ring around slider */
+
+        }
+
+        input:disabled + .toggle-slider {
+
+            cursor: not-allowed;
+
+            background-color: #E9ECEF; /* neutral-200 */
+
+        }
+
+         input:disabled + .toggle-slider:before {
+
+            background-color: #F1F3F5; /* neutral-100 */
+
+        }
+
+ 
+
+        /* Style for course card thumbnails */
+
+        .course-thumbnail {
+
+            aspect-ratio: 16 / 9;
+
+            object-fit: cover;
+
+        }
+
+ 
+
+        /* Utility for inline icons */
+
+        .icon {
+
+            display: inline-block;
+
+            vertical-align: -0.125em; /* Better alignment */
+
+            width: 1.1em;
+
+            height: 1.1em;
+
+        }
+
+        .icon-sm { width: 1em; height: 1em; }
+
+        .icon-lg { width: 1.25em; height: 1.25em; }
+
+ 
+
+        button .icon, a.button .icon {
+
+            margin-right: 0.4em; /* Space between icon and text */
+
+        }
+
+        button .icon-right, a.button .icon-right {
+
+            margin-right: 0;
+
+            margin-left: 0.4em;
+
+        }
+
+ 
+
+        /* General Button Styles */
+
+        .btn {
+
+            display: inline-flex; /* Use flex for alignment */
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-weight: 700; /* Bold */
+
+            padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
+
+            border-radius: 0.375rem; /* rounded-md */
+
+            border: 1px solid transparent;
+
+            transition: all 150ms ease-in-out;
+
+            cursor: pointer;
+
+            text-decoration: none; /* Remove underline from links styled as buttons */
+
+            white-space: nowrap;
+
+        }
+
+        .btn:focus-visible { /* Consistent focus ring */
+
+            outline: 2px solid transparent;
+
+            outline-offset: 2px;
+
+            box-shadow: 0 0 0 3px rgba(0, 91, 172, 0.4);
+
+        }
+
+        .btn:disabled {
+
+            opacity: 0.6;
+
+            cursor: not-allowed;
+
+        }
+
+ 
+
+        /* Primary Button */
+
+        .btn-primary {
+
+            background-color: #005BAC; /* primary */
+
+            color: white;
+
+            border-color: #005BAC;
+
+        }
+
+        .btn-primary:hover:not(:disabled) {
+
+            background-color: #004A8C; /* primary-dark */
+
+            border-color: #004A8C;
+
+        }
+
+ 
+
+        /* Secondary Button (Outline) */
+
+        .btn-secondary {
+
+            background-color: white;
+
+            color: #005BAC; /* primary */
+
+            border-color: #005BAC; /* primary */
+
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+
+            background-color: #E6F0FA; /* primary-light */
+
+            border-color: #004A8C; /* primary-dark */
+
+            color: #004A8C;
+
+        }
+
+ 
+
+        /* Tertiary Button (Ghost/Text) */
+
+        .btn-tertiary {
+
+            background-color: transparent;
+
+            color: #005BAC; /* primary */
+
+            border-color: transparent;
+
+            padding-left: 0.5rem;
+
+            padding-right: 0.5rem;
+
+        }
+
+        .btn-tertiary:hover:not(:disabled) {
+
+            background-color: #E6F0FA; /* primary-light */
+
+            color: #004A8C;
+
+        }
+
+ 
+
+        /* Cancel/Neutral Button */
+
+        .btn-neutral {
+
+             background-color: white;
+
+             color: #495057; /* neutral-700 */
+
+             border-color: #CED4DA; /* neutral-400 */
+
+        }
+
+        .btn-neutral:hover:not(:disabled) {
+
+            background-color: #F1F3F5; /* neutral-100 */
+
+            border-color: #ADB5BD; /* neutral-500 */
+
+            color: #212529; /* neutral-900 */
+
+        }
+
+ 
+
+        /* Input & Select Styling */
+
+        .form-input, .form-select {
+
+             border-color: #CED4DA; /* neutral-400 */
+
+             border-radius: 0.375rem; /* rounded-md */
+
+             padding-top: 0.625rem; /* Match button padding */
+
+             padding-bottom: 0.625rem;
+
+             transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+
+        }
+
+        .form-input:focus, .form-select:focus {
+
+            border-color: #005BAC; /* primary */
+
+            box-shadow: 0 0 0 3px rgba(0, 91, 172, 0.25);
+
+            outline: none;
+
+        }
+
+        .form-input::placeholder {
+
+            color: #ADB5BD; /* neutral-500 */
+
+        }
+
+        .form-select:disabled {
+
+             background-color: #E9ECEF; /* neutral-200 */
+
+             cursor: not-allowed;
+
+        }
+
+ 
+
+        /* Card Styling */
+
+        .card {
+
+            background-color: white;
+
+            border-radius: 0.5rem; /* rounded-lg */
+
+            border: 1px solid #E9ECEF; /* neutral-200 */
+
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px 0 rgb(0 0 0 / 0.04); /* Refined shadow */
+
+            transition: box-shadow 200ms ease-in-out, border-color 200ms ease-in-out;
+
+        }
+
+        .card-hover:hover {
+
+            box-shadow: 0 4px 8px -1px rgb(0 0 0 / 0.1), 0 2px 6px -2px rgb(0 0 0 / 0.08); /* Enhanced hover shadow */
+
+            /* border-color: #DEE2E6; neutral-300 */
+
+        }
+
+ 
+
+        /* Alert Boxes */
+
+        .alert {
+
+            display: flex;
+
+            align-items: flex-start; /* Align icon top */
+
+            gap: 0.75rem; /* gap-3 */
+
+            padding: 1rem; /* p-4 */
+
+            border-radius: 0.375rem; /* rounded-md */
+
+            border-width: 1px;
+
+            border-style: solid;
+
+            font-size: 0.875rem; /* text-sm */
+
+        }
+
+        .alert .icon {
+
+            flex-shrink: 0;
+
+            width: 1.25rem; /* w-5 */
+
+            height: 1.25rem; /* h-5 */
+
+            margin-top: 0.125rem; /* Align icon slightly better */
+
+        }
+
+        .alert-error {
+
+            background-color: #FAEAEE; /* error-light */
+
+            border-color: #F5C6CB; /* Adjust border for light bg */
+
+            color: #A52A1D; /* error-dark */
+
+        }
+
+        .alert-success {
+
+            background-color: #E8F2EB; /* success-light */
+
+            border-color: #C3E6CB;
+
+            color: #156A34; /* success-dark */
+
+        }
+
+        .alert-info { /* Added Info variant */
+
+            background-color: #E6F0FA; /* primary-light */
+
+            border-color: #B8DAF5;
+
+            color: #004A8C; /* primary-dark */
+
+        }
+
+    </style>
+
+</head>
+
+<body class="pt-28 pb-16 px-4 md:px-8 space-y-16">
+
+ 
+
+    <!-- Header -->
+
+    <header class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-md border-b border-neutral-200 z-50">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="flex justify-between items-center h-16">
+
+                <div class="flex-shrink-0 flex items-center">
+
+                    <!-- Logo Placeholder -->
+
+                    <svg xmlns=http://www.w3.org/2000/svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#005BAC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+
+                    <span class="ml-2 text-xl font-bold text-neutral-800">Canvas</span>
+
+                </div>
+
+                <nav class="hidden md:flex md:items-center md:space-x-4">
+
+                     <a href="#step1" class="text-sm font-medium text-neutral-600 hover:text-primary transition-colors duration-150 ease-in-out flex items-center gap-1.5"><i data-lucide="log-in" class="icon-sm"></i>Login</a>
+
+                     <a href="#step2" class="text-sm font-medium text-neutral-600 hover:text-primary transition-colors duration-150 ease-in-out flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="icon-sm"></i>Dashboard</a>
+
+                     <a href="#step3" class="text-sm font-medium text-neutral-600 hover:text-primary transition-colors duration-150 ease-in-out flex items-center gap-1.5"><i data-lucide="book-open" class="icon-sm"></i>Course</a>
+
+                     <a href="#step4" class="text-sm font-medium text-neutral-600 hover:text-primary transition-colors duration-150 ease-in-out flex items-center gap-1.5"><i data-lucide="settings-2" class="icon-sm"></i>Interactions</a>
+
+                     <a href="#step5" class="text-sm font-medium text-neutral-600 hover:text-primary transition-colors duration-150 ease-in-out flex items-center gap-1.5"><i data-lucide="upload-cloud" class="icon-sm"></i>Submit</a>
+
+                     <a href="#step6" class="text-sm font-medium text-neutral-600 hover:text-primary transition-colors duration-150 ease-in-out flex items-center gap-1.5"><i data-lucide="check-circle" class="icon-sm"></i>Confirm</a>
+
+                </nav>
+
+                 <!-- Mobile Menu Button Placeholder -->
+
+                 <div class="md:hidden">
+
+                    <button class="text-neutral-600 hover:text-primary">
+
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+
+                    </button>
+
+                 </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+ 
+
+    <h1 class="text-3xl md:text-4xl font-bold text-neutral-800 mb-12 text-center max-w-4xl mx-auto">Canvas Prototype Submission Flow</h1>
+
+ 
+
+    <!-- Step 1: Login -->
+
+    <section id="step1" class="max-w-md mx-auto card p-8 md:p-10">
+
+        <h2 class="text-2xl font-bold text-neutral-800 mb-8 text-center">Log In to Canvas</h2>
+
+        <form class="space-y-6" id="login-form">
+
+            <div id="login-error" class="alert alert-error hidden" role="alert">
+
+                <i data-lucide="alert-circle" class="icon"></i>
+
+                <span id="login-error-message">Invalid username or password. Please try again.</span>
+
+            </div>
+
+            <div>
+
+                <label for="username" class="block text-sm font-medium text-neutral-700 mb-1.5">Email Address</label>
+
+                <input type="email" id="username" name="username" placeholder=email@university.edu required autocomplete="username"
+
+                       class="form-input w-full block">
+
+            </div>
+
+            <div>
+
+                <label for="password" class="block text-sm font-medium text-neutral-700 mb-1.5">Password</label>
+
+                <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password"
+
+                       class="form-input w-full block">
+
+            </div>
+
+            <div class="pt-2">
+
+                <button type="button" id="login-button" class="btn btn-primary w-full text-base">
+
+                    <i data-lucide="log-in" class="icon"></i>
+
+                    Log In
+
+                </button>
+
+            </div>
+
+            <div class="text-center">
+
+                <a href="#" class="text-sm text-primary hover:text-primary-dark hover:underline font-medium">
+
+                    Forgot Password?
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+ 
+
+    <!-- Step 2: Dashboard -->
+
+    <section id="step2" class="max-w-6xl mx-auto card p-8 md:p-10">
+
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+
+            <h2 class="text-2xl font-bold text-neutral-800">Welcome, <span class="text-primary">@aardesh</span></h2>
+
+            <!-- Add other dashboard controls here if needed -->
+
+        </div>
+
+        <h3 class="text-xl font-bold text-neutral-700 mb-6 border-b border-neutral-200 pb-4 flex items-center gap-2.5">
+
+            <i data-lucide="layout-dashboard" class="w-5 h-5 text-neutral-500"></i>My Courses
+
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Course Card Example (Apply this structure to others) -->
+
+            <div class="card card-hover overflow-hidden flex flex-col group">
+
+                <img src=https://placehold.co/600x338/005BAC/FFFFFF?text=Design+501 alt="Design Course Thumbnail" class="course-thumbnail w-full border-b border-neutral-200" onerror="this.src='https://placehold.co/600x338/E9ECEF/ADB5BD?text=Image+Not+Found'">
+
+                <div class="p-5 flex flex-col flex-grow">
+
+                    <h4 class="text-lg font-bold text-neutral-800 group-hover:text-primary transition-colors duration-150 ease-in-out mb-1">Design 501</h4>
+
+                    <p class="text-sm text-neutral-500 mb-2">DES-501-SP25</p>
+
+                    <p class="text-sm text-neutral-600 flex-grow mb-4">Introduction to design principles and practices for modern interfaces.</p>
+
+                    <a href="#step3" class="button btn btn-secondary btn-sm self-start mt-auto text-sm group">
+
+                        Go to course <i data-lucide="arrow-right" class="icon-sm icon-right w-4 h-4 transition-transform duration-200 ease-in-out group-hover:translate-x-1"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- Repeat similar card structure for other courses -->
+
+             <div class="card card-hover overflow-hidden flex flex-col group">
+
+                <img src=https://placehold.co/600x338/1B7F40/FFFFFF?text=AI+601 alt="AI Course Thumbnail" class="course-thumbnail w-full border-b border-neutral-200" onerror="this.src='https://placehold.co/600x338/E9ECEF/ADB5BD?text=Image+Not+Found'">
+
+                <div class="p-5 flex flex-col flex-grow">
+
+                    <h4 class="text-lg font-bold text-neutral-800 group-hover:text-primary transition-colors duration-150 ease-in-out mb-1">AI 601</h4>
+
+                    <p class="text-sm text-neutral-500 mb-2">CS-601-SP25</p>
+
+                    <p class="text-sm text-neutral-600 flex-grow mb-4">Exploring concepts in Artificial Intelligence and Machine Learning.</p>
+
+                    <a href="#" class="button btn btn-secondary btn-sm self-start mt-auto text-sm group">
+
+                         Go to course <i data-lucide="arrow-right" class="icon-sm icon-right w-4 h-4 transition-transform duration-200 ease-in-out group-hover:translate-x-1"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+             <div class="card card-hover overflow-hidden flex flex-col group">
+
+                <img src=https://placehold.co/600x338/E7792D/FFFFFF?text=History+101 alt="History Course Thumbnail" class="course-thumbnail w-full border-b border-neutral-200" onerror="this.src='https://placehold.co/600x338/E9ECEF/ADB5BD?text=Image+Not+Found'">
+
+                <div class="p-5 flex flex-col flex-grow">
+
+                    <h4 class="text-lg font-bold text-neutral-800 group-hover:text-primary transition-colors duration-150 ease-in-out mb-1">History 101</h4>
+
+                    <p class="text-sm text-neutral-500 mb-2">HIS-101-SP25</p>
+
+                    <p class="text-sm text-neutral-600 flex-grow mb-4">A survey of major world historical events and their impact.</p>
+
+                    <a href="#" class="button btn btn-secondary btn-sm self-start mt-auto text-sm group">
+
+                        Go to course <i data-lucide="arrow-right" class="icon-sm icon-right w-4 h-4 transition-transform duration-200 ease-in-out group-hover:translate-x-1"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- Add more course cards as needed -->
+
+ 
+
+        </div>
+
+    </section>
+
+ 
+
+    <!-- Step 3: Course Page -->
+
+    <section id="step3" class="max-w-4xl mx-auto card p-8 md:p-10">
+
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4 border-b border-neutral-200 pb-6">
+
+            <h1 class="text-2xl font-bold text-neutral-800 flex items-center gap-2.5">
+
+                <i data-lucide="book-open" class="w-6 h-6 text-primary"></i>Course: Design 501
+
+            </h1>
+
+            <a href="#step2" class="btn btn-neutral btn-sm text-sm">
+
+                <i data-lucide="arrow-left" class="icon-sm"></i> Back to Dashboard
+
+            </a>
+
+        </div>
+
+        <div class="bg-neutral-50 p-6 rounded-lg border border-neutral-200 mb-8">
+
+             <h3 class="text-lg font-bold text-neutral-700 mb-4 flex items-center gap-2.5">
+
+                <i data-lucide="clipboard-list" class="w-5 h-5 text-neutral-500"></i>Assignment Details
+
+            </h3>
+
+            <div class="space-y-3 text-sm">
+
+                <p class="text-neutral-700"><strong class="font-semibold text-neutral-800">Assignment:</strong> Design Project 1 - Mid-Fidelity Prototype</p>
+
+                <p class="text-neutral-700"><strong class="font-semibold text-neutral-800">Due Date:</strong> April 15, 2025 at 11:59 PM EDT</p>
+
+                <p class="text-neutral-700 leading-relaxed"><strong class="font-semibold text-neutral-800 block mb-1">Instructions:</strong> Create a mid-fidelity prototype demonstrating the user login and course selection flow. Ensure all interactive elements behave as expected. Submit your publicly accessible Figma prototype link using the tools below.</p>
+
+                 <a href="#" class="inline-flex items-center gap-1.5 text-primary hover:text-primary-dark hover:underline font-medium text-sm pt-1">
+
+                    <i data-lucide="file-text" class="icon-sm"></i> View Full Rubric
+
+                 </a>
+
+            </div>
+
+        </div>
+
+        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+
+             <a href="#step4" class="btn btn-secondary w-full sm:w-auto">
+
+                 <i data-lucide="settings-2" class="icon"></i> Manage Interactions
+
+            </a>
+
+             <a href="#step5" class="btn btn-primary w-full sm:w-auto">
+
+                 <i data-lucide="upload-cloud" class="icon"></i> Submit Prototype
+
+            </a>
+
+        </div>
+
+    </section>
+
+ 
+
+    <!-- Step 4: Manage Interactions -->
+
+    <section id="step4" class="max-w-lg mx-auto card p-8 md:p-10">
+
+         <h2 class="text-xl font-bold text-neutral-800 mb-8 text-center flex items-center justify-center gap-2.5">
+
+            <i data-lucide="settings-2" class="w-6 h-6 text-primary"></i>Manage Allowed Interactions
+
+        </h2>
+
+        <div class="space-y-5 mb-8">
+
+            <!-- Figma Toggle -->
+
+            <div class="flex items-center justify-between bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+
+                <label for="toggle-figma" class="font-medium text-neutral-700 cursor-pointer flex-grow mr-4 flex items-center gap-2.5">
+
+                    <i data-lucide="figma" class="w-5 h-5"></i>Figma Prototypes
+
+                </label>
+
+                <label class="toggle-switch">
+
+                    <input type="checkbox" name="toggle-figma" id="toggle-figma" checked>
+
+                    <span class="toggle-slider"></span>
+
+                </label>
+
+            </div>
+
+            <!-- Adobe XD Toggle -->
+
+            <div class="flex items-center justify-between bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+
+                <label for="toggle-xd" class="font-medium text-neutral-700 cursor-pointer flex-grow mr-4 flex items-center gap-2.5">
+
+                    <i data-lucide="box" class="w-5 h-5"></i>Adobe XD Links
+
+                </label>
+
+                 <label class="toggle-switch">
+
+                    <input type="checkbox" name="toggle-xd" id="toggle-xd">
+
+                    <span class="toggle-slider"></span>
+
+                </label>
+
+            </div>
+
+            <!-- Code Editor Toggle -->
+
+            <div class="flex items-center justify-between bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+
+                <label for="toggle-code" class="font-medium text-neutral-700 cursor-pointer flex-grow mr-4 flex items-center gap-2.5">
+
+                    <i data-lucide="code" class="w-5 h-5"></i>Code Editor (e.g., CodePen)
+
+                </label>
+
+                 <label class="toggle-switch">
+
+                    <input type="checkbox" name="toggle-code" id="toggle-code">
+
+                    <span class="toggle-slider"></span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-2">
+
+            <a href="#step3" class="btn btn-neutral w-full sm:w-auto order-2 sm:order-1">
+
+                 <i data-lucide="x" class="icon-sm"></i>Cancel
+
+            </a>
+
+            <a href="#step5" class="btn btn-primary w-full sm:w-auto order-1 sm:order-2">
+
+                 <i data-lucide="check" class="icon-sm"></i>Apply Changes
+
+            </a>
+
+        </div>
+
+    </section>
+
+ 
+
+    <!-- Step 5: Submit Prototype -->
+
+    <section id="step5" class="max-w-xl mx-auto card p-8 md:p-10">
+
+        <h2 class="text-xl font-bold text-neutral-800 mb-8 flex items-center gap-2.5">
+
+            <i data-lucide="upload-cloud" class="w-6 h-6 text-primary"></i>Submit Your Prototype
+
+        </h2>
+
+        <form class="space-y-6" id="submit-form">
+
+             <div>
+
+                <label for="integration-select" class="block text-sm font-medium text-neutral-700 mb-1.5">Submission Type</label>
+
+                <select id="integration-select" name="integration" class="form-select w-full block">
+
+                    <!-- Options will be populated by JS -->
+
+                    <option value="" disabled selected>Select enabled tool...</option>
+
+                    <option value="figma">Figma</option>
+
+                    <option value="xd">Adobe XD</option>
+
+                    <option value="code">Code Editor</option>
+
+                </select>
+
+            </div>
+
+ 
+
+            <!-- Status messages container -->
+
+            <div id="integration-status-messages" class="space-y-3">
+
+                <div id="status-figma" class="alert alert-success hidden" role="status">
+
+                    <i data-lucide="check-circle" class="icon"></i>
+
+                    <div><strong class="font-semibold">Figma Integration:</strong> Connected as aardesh@iu.edu. Ready for submission.</div>
+
+                </div>
+
+                 <div id="status-xd" class="alert alert-warning hidden" role="status">
+
+                    <i data-lucide="alert-triangle" class="icon"></i>
+
+                    <div><strong class="font-semibold">Adobe XD:</strong> This integration is not enabled for this assignment.</div>
+
+                </div>
+
+                 <div id="status-code" class="alert alert-warning hidden" role="status">
+
+                    <i data-lucide="alert-triangle" class="icon"></i>
+
+                    <div><strong class="font-semibold">Code Editor:</strong> This integration is not enabled for this assignment.</div>
+
+                </div>
+
+            </div>
+
+ 
+
+            <div id="link-input-area" class="hidden"> <!-- Initially hidden, shown based on selection -->
+
+                <label for="prototype-link" id="link-label" class="block text-sm font-medium text-neutral-700 mb-1.5">Prototype Link</label>
+
+                <input type="url" id="prototype-link" name="prototype-link" placeholder=https://www.example.com/... required
+
+                       class="form-input w-full block">
+
+                 <p class="mt-1.5 text-xs text-neutral-500">Ensure your link sharing permissions are set correctly.</p>
+
+            </div>
+
+ 
+
+             <div id="submit-error" class="alert alert-error hidden" role="alert">
+
+                <i data-lucide="alert-circle" class="icon"></i>
+
+                <span id="submit-error-message">Please provide a valid link for the selected integration.</span>
+
+            </div>
+
+ 
+
+            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 pt-4">
+
+                 <button type="button" id="preview-button" disabled class="btn btn-secondary flex-1">
+
+                     <i data-lucide="eye" class="icon"></i> Preview Before Submit
+
+                </button>
+
+                 <button type="button" id="submit-upload-button" disabled class="btn btn-primary flex-1">
+
+                     <span class="button-text"><i data-lucide="upload-cloud" class="icon"></i> Upload Submission</span>
+
+                     <span class="loading-spinner hidden animate-spin mr-2">
+
+                         <i data-lucide="loader-2" class="w-5 h-5"></i>
+
+                     </span>
+
+                     <span class="loading-text hidden">Uploading...</span>
+
+                 </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+ 
+
+    <!-- Step 6: Confirmation -->
+
+    <section id="step6" class="max-w-lg mx-auto card p-8 md:p-10 text-center">
+
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-success mb-5 ring-4 ring-success/20">
+
+             <i data-lucide="check" class="text-white w-10 h-10 stroke-[3]"></i>
+
+        </div>
+
+        <h2 class="text-2xl font-bold text-success mb-2">Submission Successful!</h2>
+
+        <p class="text-lg text-neutral-700 mb-6">Your prototype for Design Project 1 has been received.</p>
+
+        <div class="bg-neutral-50 p-4 rounded-lg border border-neutral-200 mb-8 text-left text-sm space-y-3">
+
+            <p class="text-neutral-700 break-words">
+
+                 <span class="font-semibold text-neutral-800 flex items-center gap-1.5"><i data-lucide="link" class="w-4 h-4 text-neutral-500"></i>Submitted Link:</span>
+
+                <a href="#" class="text-primary hover:underline font-medium block mt-1 ml-[22px]">https://www.figma.com/proto/ABC123XYZ/My-Design-Project-1?...</a>
+
+            </p>
+
+            <p class="text-neutral-700">
+
+                 <span class="font-semibold text-neutral-800 flex items-center gap-1.5"><i data-lucide="calendar-check" class="w-4 h-4 text-neutral-500"></i>Submitted On:</span>
+
+                 <span class="ml-1">April 8, 2025 at 12:14 PM EDT</span>
+
+            </p>
+
+             <p class="text-neutral-700">
+
+                 <span class="font-semibold text-neutral-800 flex items-center gap-1.5"><i data-lucide="user" class="w-4 h-4 text-neutral-500"></i>Submitted By:</span>
+
+                 <span class="ml-1">aardesh@iu.edu</span>
+
+            </p>
+
+        </div>
+
+        <div class="space-y-3">
+
+             <a href="#step2" class="btn btn-primary w-full">
+
+                <i data-lucide="arrow-left" class="icon"></i> Back to Dashboard
+
+            </a>
+
+             <button type="button" class="btn btn-secondary w-full">
+
+                 <i data-lucide="message-square" class="icon"></i> View or Add Comments
+
+            </button>
+
+             <a href="#step3" class="btn btn-tertiary text-sm font-medium mt-3 inline-flex items-center gap-1">
+
+                 <i data-lucide="clipboard-list" class="icon-sm"></i> Review Assignment Details
+
+            </a>
+
+        </div>
+
+    </section>
+
+ 
+
+    <!-- Footer Placeholder -->
+
+    <footer class="text-center mt-20 text-neutral-500 text-xs">
+
+        © 2025 University Name. All rights reserved.
+
+    </footer>
+
+ 
+
+    <script>
+
+      // Immediately invoke Lucide
+
+      lucide.createIcons();
+
+ 
+
+      document.addEventListener('DOMContentLoaded', () => {
+
+            const loginForm = document.getElementById('login-form');
+
+            const loginButton = document.getElementById('login-button');
+
+            const loginError = document.getElementById('login-error');
+
+            const loginErrorMessage = document.getElementById('login-error-message');
+
+ 
+
+            const figmaToggle = document.getElementById('toggle-figma');
+
+            const xdToggle = document.getElementById('toggle-xd');
+
+            const codeToggle = document.getElementById('toggle-code');
+
+ 
+
+            const integrationSelect = document.getElementById('integration-select');
+
+            const linkInputArea = document.getElementById('link-input-area');
+
+            const linkLabel = document.getElementById('link-label');
+
+            const prototypeLinkInput = document.getElementById('prototype-link');
+
+            const previewButton = document.getElementById('preview-button');
+
+            const submitUploadButton = document.getElementById('submit-upload-button');
+
+            const submitForm = document.getElementById('submit-form');
+
+            const submitError = document.getElementById('submit-error');
+
+            const submitErrorMessage = document.getElementById('submit-error-message');
+
+ 
+
+            const statusMessages = {
+
+                figma: document.getElementById('status-figma'),
+
+                xd: document.getElementById('status-xd'),
+
+                code: document.getElementById('status-code'),
+
+            };
+
+ 
+
+            // --- Login Simulation ---
+
+            if (loginButton) {
+
+                loginButton.addEventListener('click', () => {
+
+                    // Simulate failed login attempt
+
+                    loginErrorMessage.textContent = 'Invalid username or password. Please try again.';
+
+                    loginError.classList.remove('hidden');
+
+                    // Simple animation (optional)
+
+                    loginError.style.opacity = 0;
+
+                    requestAnimationFrame(() => {
+
+                        loginError.style.transition = 'opacity 0.3s ease-out';
+
+                        loginError.style.opacity = 1;
+
+                    });
+
+ 
+
+                    // Simulate successful login after a delay (for demo)
+
+                    // Replace this with actual navigation or state change in a real app
+
+                    // setTimeout(() => {
+
+                    //    window.location.hash = '#step2';
+
+                    //    loginError.classList.add('hidden');
+
+                    // }, 1500);
+
+                });
+
+            }
+
+ 
+
+            // --- Manage Interactions & Update Submission Form ---
+
+            const availableIntegrations = {};
+
+ 
+
+            function updateIntegrationOptions() {
+
+                // Reset select options and status messages
+
+                integrationSelect.innerHTML = '<option value="" disabled selected>Select enabled tool...</option>';
+
+                Object.values(statusMessages).forEach(msg => msg.classList.add('hidden'));
+
+                linkInputArea.classList.add('hidden'); // Hide link input initially
+
+                previewButton.disabled = true;
+
+                submitUploadButton.disabled = true;
+
+                availableIntegrations.figma = figmaToggle.checked;
+
+                availableIntegrations.xd = xdToggle.checked;
+
+                availableIntegrations.code = codeToggle.checked;
+
+ 
+
+                let hasEnabledOption = false;
+
+ 
+
+                if (availableIntegrations.figma) {
+
+                    integrationSelect.add(new Option('Figma', 'figma'));
+
+                    hasEnabledOption = true;
+
+                }
+
+                if (availableIntegrations.xd) {
+
+                    integrationSelect.add(new Option('Adobe XD', 'xd'));
+
+                     hasEnabledOption = true;
+
+                }
+
+                if (availableIntegrations.code) {
+
+                    integrationSelect.add(new Option('Code Editor', 'code'));
+
+                     hasEnabledOption = true;
+
+                }
+
+ 
+
+                 // If no options are enabled, show a message
+
+                 if (!hasEnabledOption) {
+
+                     integrationSelect.innerHTML = '<option value="" disabled selected>No integrations enabled</option>';
+
+                     integrationSelect.disabled = true;
+
+                 } else {
+
+                     integrationSelect.disabled = false;
+
+                 }
+
+ 
+
+            }
+
+ 
+
+            // Initial setup
+
+            if (figmaToggle && integrationSelect) { // Check if elements exist
+
+                 updateIntegrationOptions(); // Populate on load
+
+ 
+
+                 // Add listeners to toggles
+
+                 [figmaToggle, xdToggle, codeToggle].forEach(toggle => {
+
+                    if(toggle) {
+
+                         toggle.addEventListener('change', updateIntegrationOptions);
+
+                    }
+
+                 });
+
+ 
+
+                // Handle integration selection change
+
+                integrationSelect.addEventListener('change', function() {
+
+                    const selectedValue = this.value;
+
+                    submitError.classList.add('hidden'); // Hide previous errors
+
+ 
+
+                    // Hide all status messages first
+
+                    Object.values(statusMessages).forEach(msg => msg.classList.add('hidden'));
+
+ 
+
+                    if (selectedValue && availableIntegrations[selectedValue]) {
+
+                        // Show relevant success/connected message
+
+                        if (statusMessages[selectedValue] && statusMessages[selectedValue].classList.contains('alert-success')) {
+
+                             statusMessages[selectedValue].classList.remove('hidden');
+
+                        }
+
+ 
+
+                        // Show and configure link input area
+
+                        linkInputArea.classList.remove('hidden');
+
+                        linkLabel.textContent = `${selectedValue.charAt(0).toUpperCase() + selectedValue.slice(1)} Prototype Link`;
+
+                        prototypeLinkInput.placeholder = `https://www.${selectedValue === 'code' ? 'codepen.io/...' : selectedValue + '.com/...'}`;
+
+                        prototypeLinkInput.value = ''; // Clear previous input
+
+ 
+
+                        // Enable buttons
+
+                        previewButton.disabled = false;
+
+                        submitUploadButton.disabled = false;
+
+ 
+
+                    } else if (selectedValue) {
+
+                        // Show the "not enabled" warning message for the selected but disabled option
+
+                        if (statusMessages[selectedValue]) {
+
+                            statusMessages[selectedValue].classList.remove('hidden');
+
+                        }
+
+                        linkInputArea.classList.add('hidden');
+
+                        previewButton.disabled = true;
+
+                        submitUploadButton.disabled = true;
+
+                    } else {
+
+                        // No selection or "Select..." chosen
+
+                        linkInputArea.classList.add('hidden');
+
+                        previewButton.disabled = true;
+
+                        submitUploadButton.disabled = true;
+
+                    }
+
+                });
+
+            }
+
+ 
+
+ 
+
+            // --- Submit Button Simulation ---
+
+             if (submitUploadButton) {
+
+                 const buttonText = submitUploadButton.querySelector('.button-text');
+
+                 const loadingSpinner = submitUploadButton.querySelector('.loading-spinner');
+
+                 const loadingText = submitUploadButton.querySelector('.loading-text');
+
+ 
+
+                 submitUploadButton.addEventListener('click', (e) => {
+
+                    e.preventDefault(); // Prevent default form submission if it were a submit type
+
+ 
+
+                    // Basic validation
+
+                    if (!prototypeLinkInput.value || !prototypeLinkInput.checkValidity()) {
+
+                         submitErrorMessage.textContent = 'Please enter a valid URL for your prototype.';
+
+                         submitError.classList.remove('hidden');
+
+                         prototypeLinkInput.focus();
+
+                         return;
+
+                    }
+
+                    submitError.classList.add('hidden');
+
+ 
+
+                    // Simulate loading state
+
+                    submitUploadButton.disabled = true;
+
+                    buttonText.classList.add('hidden');
+
+                    loadingSpinner.classList.remove('hidden');
+
+                    loadingText.classList.remove('hidden');
+
+ 
+
+                    // Simulate network request
+
+                    setTimeout(() => {
+
+                        // On successful "upload", navigate to confirmation
+
+                        window.location.hash = '#step6';
+
+ 
+
+                        // Reset button state (important if user navigates back)
+
+                        submitUploadButton.disabled = false;
+
+                         buttonText.classList.remove('hidden');
+
+                         loadingSpinner.classList.add('hidden');
+
+                         loadingText.classList.add('hidden');
+
+                         prototypeLinkInput.value = ''; // Clear input
+
+                         integrationSelect.value = ''; // Reset dropdown
+
+                         integrationSelect.dispatchEvent(new Event('change')); // Trigger update
+
+ 
+
+ 
+
+                    }, 2000); // 2-second delay
+
+                 });
+
+             }
+
+ 
+
+      }); // End DOMContentLoaded
+
+    </script>
+
+ 
+
+</body>
+
+</html>
